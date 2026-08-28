@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Verdict — everyone on the same page, even the agents</title>
-<meta name="description" content="Verdict keeps a team and its AI agents on the same page — every Claude Code and Codex session in one place, with a warning before two people start the same work. For macOS." />
+<meta name="description" content="Connect your team’s Claude Code and Codex chats and Verdict keeps everyone on the same page — the issue board stays current, and agents warn each other before two people build the same fix. For macOS." />
 <meta property="og:title" content="Verdict — everyone on the same page, even the agents" />
 <meta property="og:description" content="Every teammate's Claude Code and Codex sessions, transcripts, diffs, and the issues they surfaced — in one place. macOS." />
 <link rel="icon" href="assets/verdict-logo.svg" type="image/svg+xml" />
@@ -344,9 +344,9 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
     <p class="eyebrow">For teams who code with Claude Code and Codex</p>
     <h1 style="margin-top:14px">Everyone on the <em>same page</em>. Even the agents.</h1>
     <p class="sub">
-      Every teammate's sessions land in one place — full transcripts, the diffs each
-      turn produced, and the problems mentioned along the way. And before two people
-      start the same work, Verdict says so, right in the agent.
+      Connect your team's Claude Code and Codex chats — that's it. Your agents keep
+      the issue board current and warn each other about what's already being worked
+      on. No more status updates on WhatsApp, no more two people building the same fix.
     </p>
     <p class="mac">For macOS. The desktop app is where the terminal and session sync live.</p>
     <div class="cta">
@@ -360,225 +360,31 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
       <figure class="vd-frame">
         <div class="vd-titlebar">
           <span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span>
-          <span class="vd-tl" style="background:#28c840"></span><span>Verdict — four agents at once, full page</span>
+          <span class="vd-tl" style="background:#28c840"></span><span>Two agents, one issue — caught before the overlap</span>
         </div>
-        <div class="vd-chathead">
-          <div class="vd-tabs"><span class="vd-tab">Chat</span><span class="vd-tab">Agent</span><span class="vd-tab on">Terminal</span></div>
-          <span class="vd-sp"></span>
-          <span class="vd-hint">Show list</span><span class="vd-hint">Show transcript</span>
-          <span class="vd-hint" style="color:var(--accent-ink)">⤡ Exit full page</span>
-        </div>
-        <div class="vd-shellbar">
-          <span class="vd-shell on">Shell 1</span><span class="vd-shell">Shell 2</span>
-          <span class="vd-shell">Shell 3</span><span class="vd-shell">Shell 4</span>
-          <span class="vd-shell">+</span>
-          <span class="vd-split"><i>⊞</i><i>1</i><i>2</i><i>3</i><i class="on">4</i></span>
-        </div>
-        <div class="vd-panes n4">
-          <div class="vd-pane sel">
-            <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em> ~/verdict</div>
-            <div><span class="t">›</span> <span class="o">split the terminal four ways</span></div>
-            <div class="c">● Read&nbsp;&nbsp; terminal-panel.tsx</div>
-            <div>● Edit&nbsp;&nbsp; terminal-panel.tsx <span class="g">+148</span> <span class="r">−31</span></div>
-            <div><span class="g">✓</span> <span class="o">104 tests passed</span></div>
+        <div class="vd-panes n2" style="min-height:340px">
+          <div class="vd-pane" style="font-size:11.5px">
+            <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em> Tameem · ~/nav-app</div>
+            <div><span class="t">›</span> <span class="o">speed cameras vanish at low zoom — fix it</span></div>
+            <div class="c">● Read&nbsp;&nbsp; MapView.swift</div>
+            <div class="c">● Read&nbsp;&nbsp; CameraLayer.swift</div>
+            <div>● Patch&nbsp; CameraLayer.swift <span class="g">+41</span> <span class="r">−9</span></div>
+            <div><span class="g">✓</span> <span class="o">cameras hold to zoom 9</span></div>
             <div><span class="t">›</span> <span class="o cursor">▊</span></div>
           </div>
-          <div class="vd-pane">
-            <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em> ~/nav-app</div>
-            <div><span class="t">›</span> <span class="o">speed cameras vanish at low zoom</span></div>
-            <div class="c">· scanning MapView.swift</div>
-            <div>● Patch&nbsp; MapView.swift <span class="g">+22</span> <span class="r">−6</span></div>
-            <div class="c">&nbsp;&nbsp;waiting for approval…</div>
-          </div>
-          <div class="vd-pane">
-            <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em> ~/api</div>
-            <div><span class="t">›</span> <span class="o">why is the deploy shipping old code</span></div>
-            <div class="c">● Bash&nbsp;&nbsp; railway logs --build</div>
-            <div class="c">● Read&nbsp;&nbsp; Dockerfile</div>
-            <div class="o">&nbsp;&nbsp;The snapshot predates the commit.</div>
-            <div><span class="t">›</span> <span class="o">▊</span></div>
-          </div>
-          <div class="vd-pane">
-            <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em> ~/verdict</div>
-            <div><span class="t">›</span> <span class="o">/review</span></div>
-            <div class="c">● 3 findings, 2 confirmed</div>
-            <div><span class="g">✓</span> <span class="o">auth boundary holds</span></div>
-            <div><span class="r">✗</span> <span class="o">enum declared twice</span></div>
-            <div><span class="t">›</span> <span class="o">▊</span></div>
+          <div class="vd-pane sel" style="font-size:11.5px">
+            <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em> Mohammad · ~/nav-app</div>
+            <div><span class="t">›</span> <span class="o">speed cameras disappear when I zoom out, fix that</span></div>
+            <div style="margin-top:4px;color:var(--amber)">■ Verdict — Tameem's Claude Code is already on this issue</div>
+            <div class="c">&nbsp;&nbsp;claimed 14 minutes ago · in progress · CameraLayer.swift</div>
+            <div class="c">&nbsp;&nbsp;pick something else, or re-send to continue anyway</div>
+            <div><span class="t">›</span> <span class="o cursor">▊</span></div>
           </div>
         </div>
       </figure>
     </div>
   </div>
 </section>
-
-<!-- ============================== PROBLEM ============================== -->
-<div class="dark-band">
-  <section class="problem wrap" data-reveal>
-    <p style="border-top:1px solid #2c2c3a;border-bottom:1px solid #2c2c3a">Your team ships with AI all day — and nobody can see anyone else's sessions.</p>
-    <p style="border-bottom:1px solid #2c2c3a">Work gets repeated. Bugs get mentioned to an agent in passing, and lost.</p>
-    <p style="border-bottom:1px solid #2c2c3a">Nobody knows what actually changed.</p>
-  </section>
-</div>
-
-<!-- ============================== SESSIONS ============================== -->
-<section class="band">
-  <div class="wrap spread" data-reveal>
-    <div class="vd frame-scroll" data-vd-theme="light">
-      <figure class="vd-frame">
-        <div class="vd-titlebar">
-          <span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span>
-          <span class="vd-tl" style="background:#28c840"></span><span>Verdict</span>
-        </div>
-        <div class="vd-sess">
-          <div class="vd-slist">
-            <div class="vd-head"><div class="min0"><b>Sessions</b></div><span class="vd-select">Search…</span></div>
-            <div class="vd-srow is-on">
-              <div class="t"><span class="vd-tool">C</span><b>Rework the auth redirect flow</b><span class="vd-badge g">working</span></div>
-              <div class="m"><span>42 messages</span><span>11 changes</span><span>now</span></div>
-            </div>
-            <div class="vd-srow">
-              <div class="t"><span class="vd-tool">C</span><b>Cache the session manifest</b></div>
-              <div class="m"><span>18 messages</span><span>4 changes</span><span>2h ago</span></div>
-            </div>
-            <div class="vd-srow">
-              <div class="t"><span class="vd-tool">C</span><b>Split the workspace query</b></div>
-              <div class="m"><span>63 messages</span><span>21 changes</span><span>yesterday</span></div>
-            </div>
-            <div class="vd-srow">
-              <div class="t"><span class="vd-tool">C</span><b>Tidy the diff viewer</b></div>
-              <div class="m"><span>9 messages</span><span>3 changes</span><span>2d ago</span></div>
-            </div>
-          </div>
-          <div>
-            <div class="vd-head">
-              <div class="min0"><b>Rework the auth redirect flow</b><em>42 messages · 11 changes · now</em></div>
-              <span class="vd-badge" style="background:var(--tool-claude);color:#1c1a14">Claude Code</span>
-            </div>
-            <div class="vd-tr">
-              <div class="vd-turn">
-                <span class="vd-ava" style="background:var(--accent-soft);color:var(--accent-ink)">You</span>
-                <p>The callback keeps landing on localhost in production.</p>
-              </div>
-              <div class="vd-turn">
-                <span class="vd-ava" style="background:var(--tool-claude);color:#1c1a14">C</span>
-                <p><code>nextUrl.origin</code> resolves to the container's own address behind the proxy.
-                   Reading <code>x-forwarded-host</code> instead fixes it.</p>
-              </div>
-              <div class="vd-files">
-                <div><span class="vd-plus">+12</span><span class="vd-minus">−3</span><span class="vd-mono">src/lib/auth.ts</span></div>
-                <div><span class="vd-plus">+6</span><span class="vd-minus">−1</span><span class="vd-mono">src/app/api/callback/route.ts</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="vd-chat">
-            <div class="vd-chathead" style="background:var(--bg-side)">
-              <div class="vd-tabs"><span class="vd-tab on">Chat</span><span class="vd-tab">Agent</span><span class="vd-tab">Terminal</span></div>
-              <span class="vd-badge n">42 turns</span>
-            </div>
-            <div class="vd-msgs">
-              <div class="vd-msg me">What should I check before shipping?</div>
-              <div class="vd-msg ai">The redirect URI registered on the OAuth app still points at the old host — update it, or the fix works locally and fails in production.</div>
-            </div>
-            <div class="vd-composer">
-              <div class="vd-input" style="display:flex;align-items:center">Ask about this session <span class="vd-send">↑</span></div>
-              <div class="vd-cbar"><span>/ commands</span><span class="sp"></span><span>Opus 5</span><span>high</span></div>
-            </div>
-          </div>
-        </div>
-      </figure>
-    </div>
-    <aside>
-      <span class="eyebrow">Sessions</span>
-      <h2 class="display" style="font-size:30px">Every session, on the record.</h2>
-      <p class="prose" style="margin-top:12px">
-        A teammate's session is the full transcript plus the diffs each turn produced,
-        searchable. Yours are writable; theirs are read-only.
-      </p>
-      <p class="prose" style="margin-top:10px">
-        And you can ask about one — the chat reads the transcript and diffs on demand
-        instead of being handed the whole thing.
-      </p>
-    </aside>
-  </div>
-</section>
-
-<!-- ============================== TERMINAL ============================== -->
-<div class="dark-band" id="terminal">
-  <section class="band wrap" data-reveal>
-    <span class="eyebrow">Terminal</span>
-    <h2 class="display">Your agents, side by side.</h2>
-    <p class="prose" style="margin-top:14px">
-      Real shells on your own Mac, inside the app — a real pty, so <span style="font-family:var(--mono);font-size:14px">vim</span>,
-      <span style="font-family:var(--mono);font-size:14px">top</span>, password prompts and
-      <span style="font-family:var(--mono);font-size:14px">claude</span> behave. Up to four panes at once,
-      so several agents run in parallel. A shell belongs to the project and outlives the page:
-      navigate away, come back, and the build is still going.
-    </p>
-
-    <div class="mini-grid" style="grid-template-columns:1fr 1fr;margin-top:30px">
-      <div class="mini">
-        <h3>Both themes, all sixteen colours</h3>
-        <p>The ANSI palette is defined per theme, so a <span style="font-family:var(--mono)">git diff</span> is readable on cream too.</p>
-        <div class="vd frame-scroll" data-vd-theme="light">
-          <figure class="vd-frame">
-            <div class="vd-titlebar"><span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span><span class="vd-tl" style="background:#28c840"></span><span>Cream</span></div>
-            <div class="vd-shellbar">
-              <span class="vd-shell on">Shell 1</span><span class="vd-shell">Shell 2</span><span class="vd-shell">+</span>
-              <span class="vd-split"><i>⊞</i><i>1</i><i class="on">2</i><i>3</i><i>4</i></span>
-            </div>
-            <div class="vd-panes n2" style="min-height:150px">
-              <div class="vd-pane sel">
-                <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em></div>
-                <div><span class="t">›</span> <span class="o">rename the workspace</span></div>
-                <div><span class="g">✓</span> <span class="o">14 files</span></div>
-                <div><span class="t">›</span> <span class="o cursor">▊</span></div>
-              </div>
-              <div class="vd-pane">
-                <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em></div>
-                <div><span class="t">›</span> <span class="o">add the tablet screenshots</span></div>
-                <div class="c">· generating 7in, 10in</div>
-                <div><span class="o">▊</span></div>
-              </div>
-            </div>
-          </figure>
-        </div>
-      </div>
-      <div class="mini">
-        <h3>&nbsp;</h3>
-        <p>&nbsp;</p>
-        <div class="vd frame-scroll" data-vd-theme="dark">
-          <figure class="vd-frame">
-            <div class="vd-titlebar"><span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span><span class="vd-tl" style="background:#28c840"></span><span>Dark</span></div>
-            <div class="vd-shellbar">
-              <span class="vd-shell on">Shell 1</span><span class="vd-shell">Shell 2</span><span class="vd-shell">+</span>
-              <span class="vd-split"><i>⊞</i><i>1</i><i class="on">2</i><i>3</i><i>4</i></span>
-            </div>
-            <div class="vd-panes n2" style="min-height:150px">
-              <div class="vd-pane sel">
-                <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em></div>
-                <div><span class="t">›</span> <span class="o">rename the workspace</span></div>
-                <div><span class="g">✓</span> <span class="o">14 files</span></div>
-                <div><span class="t">›</span> <span class="o cursor">▊</span></div>
-              </div>
-              <div class="vd-pane">
-                <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em></div>
-                <div><span class="t">›</span> <span class="o">add the tablet screenshots</span></div>
-                <div class="c">· generating 7in, 10in</div>
-                <div><span class="o">▊</span></div>
-              </div>
-            </div>
-          </figure>
-        </div>
-      </div>
-    </div>
-
-    <p class="prose" style="margin-top:26px;font-size:14px;color:#8a8a9e">
-      The terminal is macOS and Verdict.app only — a browser tab has no shell to open.
-      It runs on your machine; nothing is hosted.
-    </p>
-  </section>
-</div>
 
 <!-- =============================== ISSUES =============================== -->
 <section class="band" id="issues">
@@ -746,6 +552,83 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
         </div>
       </div>
     </div>
+  </section>
+</div>
+
+<!-- ============================== TERMINAL ============================== -->
+<div class="dark-band" id="terminal">
+  <section class="band wrap" data-reveal>
+    <span class="eyebrow">Terminal</span>
+    <h2 class="display">Your agents, side by side.</h2>
+    <p class="prose" style="margin-top:14px">
+      Real shells on your own Mac, inside the app — a real pty, so <span style="font-family:var(--mono);font-size:14px">vim</span>,
+      <span style="font-family:var(--mono);font-size:14px">top</span>, password prompts and
+      <span style="font-family:var(--mono);font-size:14px">claude</span> behave. Up to four panes at once,
+      so several agents run in parallel. A shell belongs to the project and outlives the page:
+      navigate away, come back, and the build is still going.
+    </p>
+
+    <div class="mini-grid" style="grid-template-columns:1fr 1fr;margin-top:30px">
+      <div class="mini">
+        <h3>Both themes, all sixteen colours</h3>
+        <p>The ANSI palette is defined per theme, so a <span style="font-family:var(--mono)">git diff</span> is readable on cream too.</p>
+        <div class="vd frame-scroll" data-vd-theme="light">
+          <figure class="vd-frame">
+            <div class="vd-titlebar"><span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span><span class="vd-tl" style="background:#28c840"></span><span>Cream</span></div>
+            <div class="vd-shellbar">
+              <span class="vd-shell on">Shell 1</span><span class="vd-shell">Shell 2</span><span class="vd-shell">+</span>
+              <span class="vd-split"><i>⊞</i><i>1</i><i class="on">2</i><i>3</i><i>4</i></span>
+            </div>
+            <div class="vd-panes n2" style="min-height:150px">
+              <div class="vd-pane sel">
+                <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em></div>
+                <div><span class="t">›</span> <span class="o">rename the workspace</span></div>
+                <div><span class="g">✓</span> <span class="o">14 files</span></div>
+                <div><span class="t">›</span> <span class="o cursor">▊</span></div>
+              </div>
+              <div class="vd-pane">
+                <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em></div>
+                <div><span class="t">›</span> <span class="o">add the tablet screenshots</span></div>
+                <div class="c">· generating 7in, 10in</div>
+                <div><span class="o">▊</span></div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+      <div class="mini">
+        <h3>&nbsp;</h3>
+        <p>&nbsp;</p>
+        <div class="vd frame-scroll" data-vd-theme="dark">
+          <figure class="vd-frame">
+            <div class="vd-titlebar"><span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span><span class="vd-tl" style="background:#28c840"></span><span>Dark</span></div>
+            <div class="vd-shellbar">
+              <span class="vd-shell on">Shell 1</span><span class="vd-shell">Shell 2</span><span class="vd-shell">+</span>
+              <span class="vd-split"><i>⊞</i><i>1</i><i class="on">2</i><i>3</i><i>4</i></span>
+            </div>
+            <div class="vd-panes n2" style="min-height:150px">
+              <div class="vd-pane sel">
+                <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em></div>
+                <div><span class="t">›</span> <span class="o">rename the workspace</span></div>
+                <div><span class="g">✓</span> <span class="o">14 files</span></div>
+                <div><span class="t">›</span> <span class="o cursor">▊</span></div>
+              </div>
+              <div class="vd-pane">
+                <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em></div>
+                <div><span class="t">›</span> <span class="o">add the tablet screenshots</span></div>
+                <div class="c">· generating 7in, 10in</div>
+                <div><span class="o">▊</span></div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <p class="prose" style="margin-top:26px;font-size:14px;color:#8a8a9e">
+      The terminal is macOS and Verdict.app only — a browser tab has no shell to open.
+      It runs on your machine; nothing is hosted.
+    </p>
   </section>
 </div>
 
