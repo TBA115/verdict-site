@@ -142,32 +142,25 @@ h2.display { font-size: clamp(30px, 4.4vw, 46px); margin-top: 10px; }
 .fact h3 { font-family: var(--serif); font-size: 21px; font-weight: 500; }
 .fact p { margin-top: 9px; font-size: 14.5px; color: var(--ink-2); }
 
-/* pricing */
-.price-card {
-  margin-top: 36px; max-width: 460px; border: 1px solid var(--ink);
-  border-radius: 15px; background: var(--cream); overflow: hidden;
+/* pricing — three tiers side by side, Pro carrying the weight */
+.tier-grid { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
+.tier {
+  display: flex; flex-direction: column; border: 1px solid #3b3b4d; border-radius: 15px;
+  background: var(--night-sub); padding: 24px;
 }
-.price-card .head { padding: 26px 28px 20px; border-bottom: 1px solid var(--line); }
-.price-num { font-family: var(--serif); font-size: 58px; font-weight: 500; letter-spacing: -.02em; line-height: 1; }
-.price-num small { font-family: var(--sans); font-size: 15px; color: var(--ink-3); font-weight: 400; letter-spacing: 0; }
-.price-card .who { margin-top: 6px; font-size: 15px; color: var(--ink-2); }
-.price-card ul { padding: 20px 28px; display: grid; gap: 9px; font-size: 14.5px; color: var(--ink-2); }
-.price-card li { display: flex; gap: 9px; }
-.price-card li::before { content: "—"; color: var(--ink-3); flex: none; }
-.price-card .act { padding: 0 28px 26px; }
+.tier.is-pro { border-color: var(--night-accent); box-shadow: 0 0 0 1px var(--night-accent); }
+.tier-name { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #8a8a9e; display: flex; align-items: center; gap: 8px; }
+.tier-tag { border: 1px solid var(--night-accent); color: var(--night-accent); border-radius: 999px; padding: 1px 8px; font-size: 10px; letter-spacing: .06em; }
+.tier-price { margin-top: 12px; font-family: var(--serif); font-size: 44px; font-weight: 500; letter-spacing: -.02em; line-height: 1; color: #f1f1f7; }
+.tier-price small { font-family: var(--sans); font-size: 14px; color: #8a8a9e; font-weight: 400; letter-spacing: 0; }
+.tier-alt { margin-top: 6px; font-size: 13px; color: #8a8a9e; }
+.tier ul { margin: 18px 0 22px; display: grid; gap: 8px; font-size: 13.5px; color: #adadc0; flex: 1; }
+.tier li { display: flex; gap: 8px; }
+.tier li::before { content: "—"; color: #8a8a9e; flex: none; }
+.tier .btn { justify-content: center; }
 .small-print { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); max-width: 52ch; }
 
-/* tier ladder under the pro card */
-.tier-rows { margin-top: 18px; max-width: 460px; display: grid; gap: 10px; }
-.tier-rows a {
-  display: block; text-decoration: none; border: 1px solid #3b3b4d; border-radius: 12px;
-  padding: 13px 16px; color: #adadc0; transition: border-color .12s ease;
-}
-.tier-rows a:hover { border-color: #8a8a9e; }
-.tier-rows b { display: block; font-size: 14.5px; font-weight: 600; color: #f1f1f7; }
-.tier-rows span { display: block; margin-top: 3px; font-size: 12.5px; }
-
-/* footer */
+/* footer *//* footer */
 footer { background: var(--night); color: #adadc0; padding: 44px 0 52px; }
 footer .cols { display: flex; flex-wrap: wrap; gap: 26px; align-items: center; }
 footer nav { display: flex; flex-wrap: wrap; gap: 20px; font-size: 13.5px; margin-left: auto; }
@@ -786,32 +779,42 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
   <section class="band wrap" data-reveal>
     <span class="eyebrow">Pricing</span>
     <h2 class="display">One deal — unlimited members. Three sizes.</h2>
-    <div class="price-card" style="background:var(--night-sub);border-color:#3b3b4d">
-      <div class="head" style="border-bottom-color:#2c2c3a">
-        <div style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a9e;margin-bottom:8px">Pro</div>
-        <div class="price-num" style="color:#f1f1f7">$10 <small>/ month</small></div>
-        <div class="who" style="color:#adadc0">for your whole workspace — unlimited members</div>
-      </div>
-      <ul style="color:#adadc0">
-        <li>Unlimited teammates — inviting someone costs nothing</li>
-        <li>Up to 3 workspaces on one subscription</li>
-        <li>Everything in the product — sessions, terminal, issues, updates</li>
-        <li>Your own AI key, so there is no metered cost on top</li>
-        <li>$100 a year if you'd rather pay once</li>
-      </ul>
-      <div class="act">
+    <div class="tier-grid">
+      <div class="tier is-pro">
+        <div class="tier-name">Pro <span class="tier-tag">most teams</span></div>
+        <div class="tier-price">$10 <small>/ month</small></div>
+        <div class="tier-alt">$100 a year</div>
+        <ul>
+          <li>3 workspaces</li>
+          <li>Unlimited members — inviting someone costs nothing</li>
+          <li>Everything in the product</li>
+          <li>Your own AI key, no metered cost on top</li>
+        </ul>
         <a class="btn ink" href="https://verdict-app.up.railway.app/upgrade">Get Verdict Pro</a>
       </div>
-    </div>
-    <div class="tier-rows">
-      <a href="mailto:verdict@hilmtec.com?subject=Verdict%20Max">
-        <b>Max — $25 / month</b>
-        <span>10 workspaces, unlimited members. $250 a year. Write to us and we switch you on.</span>
-      </a>
-      <a href="mailto:verdict@hilmtec.com?subject=Verdict%20Enterprise">
-        <b>Enterprise</b>
-        <span>More than 10 workspaces, invoicing, or anything custom — write to us.</span>
-      </a>
+      <div class="tier">
+        <div class="tier-name">Max</div>
+        <div class="tier-price">$25 <small>/ month</small></div>
+        <div class="tier-alt">$250 a year</div>
+        <ul>
+          <li>10 workspaces</li>
+          <li>Unlimited members</li>
+          <li>Everything in Pro</li>
+          <li>For agencies and multi-product teams</li>
+        </ul>
+        <a class="btn ghost" href="mailto:verdict@hilmtec.com?subject=Verdict%20Max">Write to us</a>
+      </div>
+      <div class="tier">
+        <div class="tier-name">Enterprise</div>
+        <div class="tier-price">Custom</div>
+        <div class="tier-alt">&nbsp;</div>
+        <ul>
+          <li>More than 10 workspaces</li>
+          <li>Invoicing</li>
+          <li>Anything your org needs agreed in writing</li>
+        </ul>
+        <a class="btn ghost" href="mailto:verdict@hilmtec.com?subject=Verdict%20Enterprise">Write to us</a>
+      </div>
     </div>
     <p class="small-print" style="color:#8a8a9e">
       The first 30 days are free, no card needed. After the trial, without a subscription,
