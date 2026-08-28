@@ -157,6 +157,16 @@ h2.display { font-size: clamp(30px, 4.4vw, 46px); margin-top: 10px; }
 .price-card .act { padding: 0 28px 26px; }
 .small-print { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); max-width: 52ch; }
 
+/* tier ladder under the pro card */
+.tier-rows { margin-top: 18px; max-width: 460px; display: grid; gap: 10px; }
+.tier-rows a {
+  display: block; text-decoration: none; border: 1px solid #3b3b4d; border-radius: 12px;
+  padding: 13px 16px; color: #adadc0; transition: border-color .12s ease;
+}
+.tier-rows a:hover { border-color: #8a8a9e; }
+.tier-rows b { display: block; font-size: 14.5px; font-weight: 600; color: #f1f1f7; }
+.tier-rows span { display: block; margin-top: 3px; font-size: 12.5px; }
+
 /* footer */
 footer { background: var(--night); color: #adadc0; padding: 44px 0 52px; }
 footer .cols { display: flex; flex-wrap: wrap; gap: 26px; align-items: center; }
@@ -778,6 +788,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
     <h2 class="display">One price. The whole team.</h2>
     <div class="price-card" style="background:var(--night-sub);border-color:#3b3b4d">
       <div class="head" style="border-bottom-color:#2c2c3a">
+        <div style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8a8a9e;margin-bottom:8px">Pro</div>
         <div class="price-num" style="color:#f1f1f7">$10 <small>/ month</small></div>
         <div class="who" style="color:#adadc0">for your whole workspace — unlimited members</div>
       </div>
@@ -791,6 +802,16 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
       <div class="act">
         <a class="btn ink" href="https://verdict-app.up.railway.app/upgrade">Get Verdict Pro</a>
       </div>
+    </div>
+    <div class="tier-rows">
+      <a href="mailto:verdict@hilmtec.com?subject=Verdict%20Max">
+        <b>Max — $25 / month</b>
+        <span>10 workspaces, unlimited members. $250 a year. Write to us and we switch you on.</span>
+      </a>
+      <a href="mailto:verdict@hilmtec.com?subject=Verdict%20Enterprise">
+        <b>Enterprise</b>
+        <span>More than 10 workspaces, invoicing, or anything custom — write to us.</span>
+      </a>
     </div>
     <p class="small-print" style="color:#8a8a9e">
       The first 30 days are free, no card needed. After the trial, without a subscription,
