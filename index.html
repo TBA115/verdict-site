@@ -407,7 +407,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 
 <!-- ============================== PROBLEM ============================== -->
 <div class="dark-band">
-  <section class="problem wrap reveal">
+  <section class="problem wrap" data-reveal>
     <p style="border-top:1px solid #2c2c3a;border-bottom:1px solid #2c2c3a">Your team ships with AI all day — and nobody can see anyone else's sessions.</p>
     <p style="border-bottom:1px solid #2c2c3a">Work gets repeated. Bugs get mentioned to an agent in passing, and lost.</p>
     <p style="border-bottom:1px solid #2c2c3a">Nobody knows what actually changed.</p>
@@ -416,7 +416,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 
 <!-- ============================== SESSIONS ============================== -->
 <section class="band">
-  <div class="wrap spread reveal">
+  <div class="wrap spread" data-reveal>
     <div class="vd frame-scroll" data-vd-theme="light">
       <figure class="vd-frame">
         <div class="vd-titlebar">
@@ -498,7 +498,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 
 <!-- ============================== TERMINAL ============================== -->
 <div class="dark-band" id="terminal">
-  <section class="band wrap reveal">
+  <section class="band wrap" data-reveal>
     <span class="eyebrow">Terminal</span>
     <h2 class="display">Your agents, side by side.</h2>
     <p class="prose" style="margin-top:14px">
@@ -575,7 +575,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 
 <!-- =============================== ISSUES =============================== -->
 <section class="band" id="issues">
-  <div class="wrap spread flip reveal">
+  <div class="wrap spread flip" data-reveal>
     <aside>
       <span class="eyebrow">Issues</span>
       <h2 class="display" style="font-size:30px">It files the issue for you.</h2>
@@ -639,7 +639,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 
 <!-- ============================ THE REST, COMPACTLY ============================ -->
 <div class="dark-band">
-  <section class="band wrap reveal">
+  <section class="band wrap" data-reveal>
     <span class="eyebrow">And the rest</span>
     <h2 class="display">The parts a team expects, kept small.</h2>
     <div class="mini-grid">
@@ -744,7 +744,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 
 <!-- ========================== PRIVACY + YOUR KEY ========================== -->
 <section class="band">
-  <div class="wrap reveal">
+  <div class="wrap" data-reveal>
     <span class="eyebrow">The two questions everyone asks</span>
     <div class="factual">
       <div class="fact">
@@ -769,7 +769,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 
 <!-- =============================== PRICING =============================== -->
 <div class="dark-band" id="pricing">
-  <section class="band wrap reveal">
+  <section class="band wrap" data-reveal>
     <span class="eyebrow">Pricing</span>
     <h2 class="display">One price. The whole team.</h2>
     <div class="price-card" style="background:var(--night-sub);border-color:#3b3b4d">
@@ -814,13 +814,22 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 
 <script>
   // A short fade on scroll-in — the page's only motion besides the cursors.
-  const io = new IntersectionObserver((entries) => {
-    for (const entry of entries) if (entry.isIntersecting) {
-      entry.target.classList.add("in");
-      io.unobserve(entry.target);
-    }
-  }, { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  // Progressive enhancement: content is visible without JS or a working
+  // IntersectionObserver; the class that hides it is only added when the
+  // observer that will unhide it exists.
+  if ("IntersectionObserver" in window &&
+      !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) if (entry.isIntersecting) {
+        entry.target.classList.add("in");
+        io.unobserve(entry.target);
+      }
+    }, { threshold: 0.08 });
+    document.querySelectorAll("[data-reveal]").forEach((el) => {
+      el.classList.add("reveal");
+      io.observe(el);
+    });
+  }
 </script>
 </body>
 </html>
