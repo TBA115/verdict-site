@@ -309,6 +309,10 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 .frame-scroll { overflow-x: auto; }
 .frame-scroll > .vd-frame, .frame-scroll .vd-frame { min-width: 640px; }
 
+@media (max-width: 620px) {
+  /* the text links go; the brand and the one button stay */
+  .top nav a:not(.btn) { display: none; }
+}
 @media (max-width: 900px) {
   .spread, .spread.flip { grid-template-columns: 1fr; }
   .spread > aside { position: static; order: -1; }
