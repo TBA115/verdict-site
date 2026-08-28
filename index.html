@@ -561,11 +561,10 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
     <span class="eyebrow">Terminal</span>
     <h2 class="display">Your agents, side by side.</h2>
     <p class="prose" style="margin-top:14px">
-      Real shells on your own Mac, inside the app — a real pty, so <span style="font-family:var(--mono);font-size:14px">vim</span>,
-      <span style="font-family:var(--mono);font-size:14px">top</span>, password prompts and
-      <span style="font-family:var(--mono);font-size:14px">claude</span> behave. Up to four panes at once,
-      so several agents run in parallel. A shell belongs to the project and outlives the page:
-      navigate away, come back, and the build is still going.
+      Your agents run inside Verdict — up to four at once, each in its own pane.
+      It's a real terminal, so everything you'd normally do in one just works,
+      and a shell keeps going when you leave the page: navigate away, come back,
+      and the build is still running.
     </p>
 
     <div class="mini-grid" style="grid-template-columns:1fr 1fr;margin-top:30px">
@@ -625,10 +624,6 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
       </div>
     </div>
 
-    <p class="prose" style="margin-top:26px;font-size:14px;color:#8a8a9e">
-      The terminal is macOS and Verdict.app only — a browser tab has no shell to open.
-      It runs on your machine; nothing is hosted.
-    </p>
   </section>
 </div>
 
@@ -640,17 +635,18 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
       <div class="fact">
         <h3>Where does my code go?</h3>
         <p>
-          Transcripts and diffs sync to your workspace's database. The terminal and the
-          agents run entirely on your Mac. Project membership is checked on the server
-          for every query — not filtered in the browser — and that boundary is covered
-          by tests that fail if a filter is removed.
+          It stays on your machine — your code, your agents, your terminal all run
+          locally. Verdict is how they keep each other posted: the transcripts and
+          diffs your team shares sync to your own workspace, visible to nobody else,
+          and nothing else leaves your Mac.
         </p>
       </div>
       <div class="fact">
         <h3>Do I need another AI subscription?</h3>
         <p>
-          No. Each person adds their own Anthropic or OpenAI key. Verdict never holds
-          a shared one, and never bills for inference — there is no metered cost on top.
+          No. Connect the Claude Code and Codex chats you already have, or add your
+          own Anthropic or OpenAI key, and that's it — no extra Claude or Codex
+          subscription, and Verdict never bills for inference.
         </p>
       </div>
     </div>
