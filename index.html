@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Verdict — see what your team's AI is actually doing</title>
+<meta name="description" content="Verdict is the hub where every teammate's Claude Code and Codex sessions land — transcripts, diffs, and the issues they surfaced — in one place. For macOS." />
+<meta property="og:title" content="Verdict — see what your team's AI is actually doing" />
+<meta property="og:description" content="Every teammate's Claude Code and Codex sessions, transcripts, diffs, and the issues they surfaced — in one place. macOS." />
+<link rel="icon" href="assets/verdict-logo.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+<style>
+/* ---------------------------------------------------------------------------
+   Verdict marketing site.
+
+   One idea carries the page: the product's own collision of warm-cream print
+   and dark-neon terminal. Cream sections argue in a display serif, like a
+   well-set broadsheet; dark bands show the product working, in mono. The
+   frames are lifted from the product's design page (public/design/index.html
+   in the chorus repo) and stay in Inter — the site never redraws the app.
+   Tokens are the product's own; change them in globals.css first.
+   --------------------------------------------------------------------------- */
+:root {
+  --cream: #f7f3e7; --cream-sub: #efe9d8; --cream-side: #f2ecdd;
+  --ink: #1c1a14; --ink-2: #57534a; --ink-3: #6b6760;
+  --line: #e5ded0; --line-2: #d8d0bd;
+  --night: #191922; --night-sub: #20202b; --night-side: #141419;
+  --paper-accent: #5453e8; --night-accent: #a482f8;
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+* , *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--cream); color: var(--ink);
+  font-family: var(--sans); line-height: 1.55;
+  -webkit-font-smoothing: antialiased; font-feature-settings: "cv11", "ss01";
+}
+img, svg { max-width: 100%; }
+a { color: inherit; }
+p, h1, h2, h3, figure, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+/* ---- editorial voice (the cream half) ---- */
+.eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.display {
+  font-family: var(--serif); font-weight: 500; letter-spacing: -.015em;
+  line-height: 1.06; text-wrap: balance;
+}
+h2.display { font-size: clamp(30px, 4.4vw, 46px); margin-top: 10px; }
+.prose { color: var(--ink-2); font-size: 16px; max-width: 58ch; }
+.rule { border: 0; border-top: 1px solid var(--line); margin: 0; }
+
+/* ---- top bar ---- */
+.top {
+  position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 10px;
+  padding: 13px 24px; border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--cream) 88%, transparent); backdrop-filter: blur(10px);
+}
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; letter-spacing: -.01em; font-size: 15px; text-decoration: none; }
+.brand img { width: 24px; height: 24px; border-radius: 7px; }
+.top nav { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 13.5px; }
+.top nav a { text-decoration: none; color: var(--ink-2); }
+.top nav a:hover { color: var(--ink); }
+.btn {
+  display: inline-flex; align-items: center; gap: 7px; border-radius: 9px; padding: 9px 16px;
+  font: inherit; font-size: 14px; font-weight: 550; text-decoration: none; cursor: pointer;
+  border: 1px solid transparent; transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn.ink { background: var(--ink); color: var(--cream); }
+.btn.ink:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -8px rgba(28,26,20,.5); }
+.btn.ghost { border-color: var(--line-2); color: var(--ink-2); background: transparent; }
+.btn.ghost:hover { border-color: var(--ink-3); color: var(--ink); }
+.btn.sm { padding: 6px 12px; font-size: 13px; }
+.dark-band .btn.ink { background: var(--night-accent); color: #14101f; }
+.dark-band .btn.ghost { border-color: #3b3b4d; color: #adadc0; }
+.dark-band .btn.ghost:hover { border-color: #8a8a9e; color: #f1f1f7; }
+
+/* ---- hero ---- */
+.hero { padding: 76px 0 0; }
+.hero h1 {
+  font-family: var(--serif); font-weight: 500; letter-spacing: -.018em; line-height: 1.02;
+  font-size: clamp(42px, 7vw, 84px); max-width: 15ch;
+}
+.hero h1 em { font-style: italic; font-weight: 400; }
+.hero .sub { margin-top: 22px; font-size: 17.5px; color: var(--ink-2); max-width: 52ch; }
+.hero .mac { margin-top: 26px; font-size: 13px; color: var(--ink-3); }
+.hero .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+.hero .cta .btn { font-size: 15px; padding: 12px 20px; }
+
+/* the terminal frame straddles the cream/night boundary */
+.hero-stage { position: relative; margin-top: 54px; }
+.hero-stage::after {
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: 0; width: 100vw; height: 55%; background: var(--night); z-index: 0;
+}
+.hero-stage .vd { position: relative; z-index: 1; }
+
+/* ---- bands ---- */
+.band { padding: 84px 0; }
+.dark-band { background: var(--night); color: #f1f1f7; }
+.dark-band .eyebrow { color: #8a8a9e; }
+.dark-band .prose { color: #adadc0; }
+.dark-band .rule { border-top-color: #2c2c3a; }
+
+/* editorial layout: content + marginalia caption */
+.spread { display: grid; grid-template-columns: 1fr 300px; gap: 40px; align-items: start; }
+.spread > aside { position: sticky; top: 84px; padding-top: 8px; }
+.spread > aside .prose { font-size: 14.5px; }
+.spread > aside .eyebrow { margin-bottom: 8px; display: block; }
+.spread.flip { grid-template-columns: 300px 1fr; }
+.spread.flip > aside { order: -1; }
+
+/* three-line problem block, set like a pull quote column */
+.problem { padding: 84px 0; }
+.problem .lines { max-width: 760px; }
+.problem p {
+  font-family: var(--serif); font-size: clamp(21px, 2.6vw, 29px); line-height: 1.35;
+  padding: 18px 0; border-bottom: 1px solid var(--line);
+}
+.problem p:first-child { border-top: 1px solid var(--line); }
+.problem p b { font-weight: 600; }
+
+/* four-up grid of small frames */
+.mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 34px; }
+.mini { min-width: 0; }
+.mini h3 { font-size: 14.5px; font-weight: 600; margin-bottom: 4px; }
+.mini p { font-size: 13px; color: #8a8a9e; margin-bottom: 12px; }
+.mini .vd-frame { margin-top: 0; zoom: .82; }
+
+/* privacy two-block */
+.factual { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 36px; }
+.fact { border: 1px solid var(--line); border-radius: 13px; padding: 22px 24px; background: var(--cream-side); }
+.fact h3 { font-family: var(--serif); font-size: 21px; font-weight: 500; }
+.fact p { margin-top: 9px; font-size: 14.5px; color: var(--ink-2); }
+
+/* pricing */
+.price-card {
+  margin-top: 36px; max-width: 460px; border: 1px solid var(--ink);
+  border-radius: 15px; background: var(--cream); overflow: hidden;
+}
+.price-card .head { padding: 26px 28px 20px; border-bottom: 1px solid var(--line); }
+.price-num { font-family: var(--serif); font-size: 58px; font-weight: 500; letter-spacing: -.02em; line-height: 1; }
+.price-num small { font-family: var(--sans); font-size: 15px; color: var(--ink-3); font-weight: 400; letter-spacing: 0; }
+.price-card .who { margin-top: 6px; font-size: 15px; color: var(--ink-2); }
+.price-card ul { padding: 20px 28px; display: grid; gap: 9px; font-size: 14.5px; color: var(--ink-2); }
+.price-card li { display: flex; gap: 9px; }
+.price-card li::before { content: "—"; color: var(--ink-3); flex: none; }
+.price-card .act { padding: 0 28px 26px; }
+.small-print { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); max-width: 52ch; }
+
+/* footer */
+footer { background: var(--night); color: #adadc0; padding: 44px 0 52px; }
+footer .cols { display: flex; flex-wrap: wrap; gap: 26px; align-items: center; }
+footer nav { display: flex; flex-wrap: wrap; gap: 20px; font-size: 13.5px; margin-left: auto; }
+footer a { color: #adadc0; text-decoration: none; }
+footer a:hover { color: #f1f1f7; }
+footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
+
+/* reveal on scroll — a short fade, nothing more */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+.cursor { animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+
+/* ---------------------------------------------------------------------------
+   Product frames — lifted from the product's design page, scoped under .vd.
+   data-vd-theme picks the palette per frame; both are the app's real tokens.
+   --------------------------------------------------------------------------- */
+.vd {
+  --accent: #5b5bf0; --accent-ink: #5453e8; --accent-soft: #eeeefe;
+  --ink: #1c1a14; --ink-2: #57534a; --ink-3: #6b6760;
+  --line: #e5ded0; --line-2: #d8d0bd;
+  --bg-app: #f7f3e7; --bg-sub: #efe9d8; --bg-side: #f2ecdd;
+  --green: #177755; --amber: #925d12; --red: #ce1e24;
+  --radius: 0.875rem; --tool-claude: #d97757; --tool-codex: #10a37f;
+  color: var(--ink); font-family: var(--sans); line-height: 1.5; min-width: 0;
+}
+.vd[data-vd-theme="dark"] {
+  --accent: #8655f6; --accent-ink: #a482f8; --accent-soft: rgba(139,92,246,.15);
+  --ink: #f1f1f7; --ink-2: #adadc0; --ink-3: #8a8a9e;
+  --line: #2c2c3a; --line-2: #3b3b4d;
+  --bg-app: #191922; --bg-sub: #20202b; --bg-side: #141419;
+  --green: #34d399; --amber: #fbbf24; --red: #f0716b;
+}
+.vd-frame {
+  border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden;
+  background: var(--bg-app); box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 22px 56px -30px rgba(28,26,20,.35);
+}
+.vd[data-vd-theme="dark"] .vd-frame { box-shadow: 0 22px 56px -30px rgba(0,0,0,.75); }
+.vd-titlebar { display: flex; align-items: center; gap: 7px; padding: 9px 13px; background: var(--bg-side); border-bottom: 1px solid var(--line); }
+.vd-tl { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.vd-titlebar span:last-child { margin-left: 6px; font-size: 11.5px; color: var(--ink-3); }
+.vd-head { display: flex; align-items: center; gap: 12px; padding: 11px 18px; border-bottom: 1px solid var(--line); }
+.vd-head b { display: block; font-size: 13.5px; font-weight: 600; }
+.vd-head em { display: block; font-size: 11.5px; color: var(--ink-3); font-style: normal; }
+.vd-head .min0 { flex: 1; min-width: 0; }
+.vd-body { padding: 18px; }
+.vd-btn { flex: none; display: inline-flex; align-items: center; gap: 5px; border: 0; border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 12.5px; font-weight: 500; background: var(--accent); color: #fff; }
+.vd-btn.sub { background: var(--bg-sub); color: var(--ink-2); }
+.vd-badge { flex: none; border-radius: 999px; padding: 2px 8px; font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+.vd-badge.g { background: color-mix(in srgb, var(--green) 14%, transparent); color: var(--green); }
+.vd-badge.a { background: color-mix(in srgb, var(--amber) 16%, transparent); color: var(--amber); }
+.vd-badge.r { background: color-mix(in srgb, var(--red) 13%, transparent); color: var(--red); }
+.vd-badge.p { background: var(--accent-soft); color: var(--accent-ink); }
+.vd-badge.n { background: var(--bg-sub); color: var(--ink-3); }
+.vd-card { border: 1px solid var(--line); border-radius: 11px; background: var(--bg-side); padding: 14px; }
+.vd-mono { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+.vd-select { border: 1px solid var(--line); border-radius: 7px; background: var(--bg-app); padding: 4px 9px; font-size: 12px; color: var(--ink-2); }
+.vd-input { border: 1px solid var(--line); border-radius: 8px; background: var(--bg-app); padding: 7px 10px; font-size: 12.5px; color: var(--ink-3); }
+.vd-tool { width: 19px; height: 19px; border-radius: 6px; flex: none; background: var(--tool-claude); color: #1c1a14; display: grid; place-items: center; font-size: 10px; font-weight: 700; }
+.vd-pfp { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 10.5px; font-weight: 600; background: var(--accent-soft); color: var(--accent-ink); }
+.vd-rows { border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+.vd-rows .r { display: flex; align-items: center; gap: 10px; padding: 10px 13px; border-bottom: 1px solid var(--line); background: var(--bg-app); }
+.vd-rows .r:last-child { border-bottom: 0; }
+.vd-rows b { font-size: 12.5px; font-weight: 500; }
+.vd-rows em { font-size: 11px; color: var(--ink-3); font-style: normal; display: block; }
+.vd-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* chat / panel chrome */
+.vd-chathead { padding: 9px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 500; background: var(--bg-app); }
+.vd-tabs { display: flex; gap: 4px; }
+.vd-tab { border-radius: 6px; padding: 3px 8px; font-size: 11.5px; font-weight: 500; color: var(--ink-3); }
+.vd-tab.on { background: var(--accent-soft); color: var(--accent-ink); }
+.vd-sp { flex: 1; }
+.vd-hint { font-size: 11px; color: var(--ink-3); display: flex; align-items: center; gap: 5px; }
+.vd-shellbar { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border-bottom: 1px solid var(--line); background: var(--bg-app); }
+.vd-shell { border-radius: 5px; padding: 2px 7px; font-size: 11px; color: var(--ink-3); }
+.vd-shell.on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+.vd-split { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.vd-split i { font-style: normal; font-size: 11px; color: var(--ink-3); padding: 1px 5px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+.vd-split i.on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+
+/* terminal panes — the 1px gap over the line colour is the divider */
+.vd-panes { display: grid; gap: 1px; background: var(--line); min-height: 300px; }
+.vd-panes.n2 { grid-template-columns: 1fr 1fr; }
+.vd-panes.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.vd-pane { background: var(--bg-sub); padding: 8px 10px; font-family: var(--mono); font-size: 10.5px; line-height: 1.55; overflow: hidden; }
+.vd-pane .p { color: var(--accent-ink); }
+.vd-pane .o { color: var(--ink-2); }
+.vd-pane .g { color: var(--green); }
+.vd-pane .r { color: var(--red); }
+.vd-pane .c { color: var(--ink-3); }
+.vd-pane .t { color: var(--accent-ink); }
+.vd-pane.sel { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+.vd-pane .who { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-family: var(--sans); font-size: 10.5px; color: var(--ink-3); }
+.vd-pane .who b { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 4px; font-size: 9px; font-weight: 700; color: #1c1a14; }
+.vd-pane .who em { font-style: normal; color: var(--ink-2); font-weight: 500; }
+
+/* sessions three-column */
+.vd-sess { display: grid; grid-template-columns: 230px 1fr 240px; min-height: 400px; }
+.vd-slist { border-right: 1px solid var(--line); }
+.vd-srow { padding: 9px 12px; border-bottom: 1px solid var(--line); }
+.vd-srow.is-on { background: var(--accent-soft); }
+.vd-srow .t { display: flex; align-items: center; gap: 7px; }
+.vd-srow .t b { font-size: 12.5px; font-weight: 500; flex: 1; min-width: 0; }
+.vd-srow .m { display: flex; gap: 11px; margin-top: 5px; font-size: 10.5px; color: var(--ink-3); }
+.vd-srow .m span:last-child { margin-left: auto; }
+.vd-tr { padding: 14px; }
+.vd-turn { display: flex; gap: 9px; margin-bottom: 13px; }
+.vd-ava { width: 22px; height: 22px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 9px; font-weight: 700; }
+.vd-turn p { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+.vd-turn code, .vd-msg code { font-family: var(--mono); font-size: 10.5px; background: var(--bg-sub); border-radius: 4px; padding: 1px 4px; color: var(--ink); }
+.vd-chat { background: var(--bg-side); border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.vd-msgs { padding: 12px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.vd-msg { border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.55; }
+.vd-msg.me { margin-left: 20px; background: color-mix(in srgb, var(--accent) 11%, transparent); }
+.vd-msg.ai { border: 1px solid var(--line); background: var(--bg-app); color: var(--ink-2); }
+.vd-composer { border-top: 1px solid var(--line); padding: 8px; }
+.vd-cbar { display: flex; align-items: center; gap: 9px; margin-top: 6px; padding: 0 3px; font-size: 10.5px; color: var(--ink-3); }
+.vd-cbar .sp { margin-left: auto; }
+.vd-send { width: 20px; height: 20px; border-radius: 6px; flex: none; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 11px; margin-left: auto; }
+
+/* kanban + timeline + files */
+.vd-kanban { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.vd-col > .h { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); margin-bottom: 7px; }
+.vd-col > .h span { background: var(--bg-sub); border-radius: 999px; padding: 1px 6px; font-size: 10px; }
+.vd-ticket { border: 1px solid var(--line); border-radius: 10px; background: var(--bg-side); padding: 9px 10px; margin-bottom: 7px; }
+.vd-ticket p { font-size: 12.5px; line-height: 1.4; }
+.vd-ticket .m { display: flex; align-items: center; gap: 6px; margin-top: 7px; }
+.vd-found { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; color: var(--accent-ink); }
+.vd-tl2 { position: relative; padding-left: 18px; }
+.vd-tl2::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 1px; background: var(--line); }
+.vd-day { font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 8px; }
+.vd-ev { position: relative; margin-bottom: 12px; }
+.vd-ev::before { content: ""; position: absolute; left: -16px; top: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.vd-ev .s { font-size: 13px; font-weight: 500; }
+.vd-ev .w { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+.vd-files { margin-top: 7px; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+.vd-files div { display: flex; align-items: center; gap: 8px; padding: 5px 10px; border-bottom: 1px solid var(--line); background: var(--bg-side); }
+.vd-files div:last-child { border-bottom: 0; }
+.vd-plus { color: var(--green); font-family: var(--mono); font-size: 10.5px; }
+.vd-minus { color: var(--red); font-family: var(--mono); font-size: 10.5px; }
+
+/* wide frames scroll inside themselves on small screens; body never x-scrolls */
+.frame-scroll { overflow-x: auto; }
+.frame-scroll > .vd-frame, .frame-scroll .vd-frame { min-width: 640px; }
+
+@media (max-width: 900px) {
+  .spread, .spread.flip { grid-template-columns: 1fr; }
+  .spread > aside { position: static; order: -1; }
+  .mini-grid, .factual { grid-template-columns: 1fr; }
+  .mini .vd-frame { zoom: 1; }
+  .band, .problem { padding: 56px 0; }
+  .hero { padding-top: 48px; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#"><img src="assets/verdict-logo.svg" alt="" /> Verdict</a>
+  <nav>
+    <a href="#terminal">Terminal</a>
+    <a href="#issues">Issues</a>
+    <a href="#pricing">Pricing</a>
+    <a class="btn ink sm" href="https://verdict-app.up.railway.app/api/download/mac">Download for Mac</a>
+  </nav>
+</header>
+
+<!-- ================================ HERO ================================ -->
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">For teams who code with Claude Code and Codex</p>
+    <h1 style="margin-top:14px">See what your team's AI is <em>actually</em> doing.</h1>
+    <p class="sub">
+      Every teammate's sessions land in one place — full transcripts, the diffs each
+      turn produced, and the problems people mentioned along the way. Verdict is the
+      hub your agents report to.
+    </p>
+    <p class="mac">For macOS. The desktop app is where the terminal and session sync live.</p>
+    <div class="cta">
+      <a class="btn ink" href="https://verdict-app.up.railway.app/api/download/mac">Download for Mac</a>
+      <a class="btn ghost" href="#pricing">See pricing</a>
+    </div>
+  </div>
+
+  <div class="wrap hero-stage">
+    <div class="vd frame-scroll" data-vd-theme="dark">
+      <figure class="vd-frame">
+        <div class="vd-titlebar">
+          <span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span>
+          <span class="vd-tl" style="background:#28c840"></span><span>Verdict — four agents at once, full page</span>
+        </div>
+        <div class="vd-chathead">
+          <div class="vd-tabs"><span class="vd-tab">Chat</span><span class="vd-tab">Agent</span><span class="vd-tab on">Terminal</span></div>
+          <span class="vd-sp"></span>
+          <span class="vd-hint">Show list</span><span class="vd-hint">Show transcript</span>
+          <span class="vd-hint" style="color:var(--accent-ink)">⤡ Exit full page</span>
+        </div>
+        <div class="vd-shellbar">
+          <span class="vd-shell on">Shell 1</span><span class="vd-shell">Shell 2</span>
+          <span class="vd-shell">Shell 3</span><span class="vd-shell">Shell 4</span>
+          <span class="vd-shell">+</span>
+          <span class="vd-split"><i>⊞</i><i>1</i><i>2</i><i>3</i><i class="on">4</i></span>
+        </div>
+        <div class="vd-panes n4">
+          <div class="vd-pane sel">
+            <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em> ~/verdict</div>
+            <div><span class="t">›</span> <span class="o">split the terminal four ways</span></div>
+            <div class="c">● Read&nbsp;&nbsp; terminal-panel.tsx</div>
+            <div>● Edit&nbsp;&nbsp; terminal-panel.tsx <span class="g">+148</span> <span class="r">−31</span></div>
+            <div><span class="g">✓</span> <span class="o">104 tests passed</span></div>
+            <div><span class="t">›</span> <span class="o cursor">▊</span></div>
+          </div>
+          <div class="vd-pane">
+            <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em> ~/nav-app</div>
+            <div><span class="t">›</span> <span class="o">speed cameras vanish at low zoom</span></div>
+            <div class="c">· scanning MapView.swift</div>
+            <div>● Patch&nbsp; MapView.swift <span class="g">+22</span> <span class="r">−6</span></div>
+            <div class="c">&nbsp;&nbsp;waiting for approval…</div>
+          </div>
+          <div class="vd-pane">
+            <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em> ~/api</div>
+            <div><span class="t">›</span> <span class="o">why is the deploy shipping old code</span></div>
+            <div class="c">● Bash&nbsp;&nbsp; railway logs --build</div>
+            <div class="c">● Read&nbsp;&nbsp; Dockerfile</div>
+            <div class="o">&nbsp;&nbsp;The snapshot predates the commit.</div>
+            <div><span class="t">›</span> <span class="o">▊</span></div>
+          </div>
+          <div class="vd-pane">
+            <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em> ~/verdict</div>
+            <div><span class="t">›</span> <span class="o">/review</span></div>
+            <div class="c">● 3 findings, 2 confirmed</div>
+            <div><span class="g">✓</span> <span class="o">auth boundary holds</span></div>
+            <div><span class="r">✗</span> <span class="o">enum declared twice</span></div>
+            <div><span class="t">›</span> <span class="o">▊</span></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== PROBLEM ============================== -->
+<div class="dark-band">
+  <section class="problem wrap reveal">
+    <p style="border-top:1px solid #2c2c3a;border-bottom:1px solid #2c2c3a">Your team ships with AI all day — and nobody can see anyone else's sessions.</p>
+    <p style="border-bottom:1px solid #2c2c3a">Work gets repeated. Bugs get mentioned to an agent in passing, and lost.</p>
+    <p style="border-bottom:1px solid #2c2c3a">Nobody knows what actually changed.</p>
+  </section>
+</div>
+
+<!-- ============================== SESSIONS ============================== -->
+<section class="band">
+  <div class="wrap spread reveal">
+    <div class="vd frame-scroll" data-vd-theme="light">
+      <figure class="vd-frame">
+        <div class="vd-titlebar">
+          <span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span>
+          <span class="vd-tl" style="background:#28c840"></span><span>Verdict</span>
+        </div>
+        <div class="vd-sess">
+          <div class="vd-slist">
+            <div class="vd-head"><div class="min0"><b>Sessions</b></div><span class="vd-select">Search…</span></div>
+            <div class="vd-srow is-on">
+              <div class="t"><span class="vd-tool">C</span><b>Rework the auth redirect flow</b><span class="vd-badge g">working</span></div>
+              <div class="m"><span>42 messages</span><span>11 changes</span><span>now</span></div>
+            </div>
+            <div class="vd-srow">
+              <div class="t"><span class="vd-tool">C</span><b>Cache the session manifest</b></div>
+              <div class="m"><span>18 messages</span><span>4 changes</span><span>2h ago</span></div>
+            </div>
+            <div class="vd-srow">
+              <div class="t"><span class="vd-tool">C</span><b>Split the workspace query</b></div>
+              <div class="m"><span>63 messages</span><span>21 changes</span><span>yesterday</span></div>
+            </div>
+            <div class="vd-srow">
+              <div class="t"><span class="vd-tool">C</span><b>Tidy the diff viewer</b></div>
+              <div class="m"><span>9 messages</span><span>3 changes</span><span>2d ago</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="vd-head">
+              <div class="min0"><b>Rework the auth redirect flow</b><em>42 messages · 11 changes · now</em></div>
+              <span class="vd-badge" style="background:var(--tool-claude);color:#1c1a14">Claude Code</span>
+            </div>
+            <div class="vd-tr">
+              <div class="vd-turn">
+                <span class="vd-ava" style="background:var(--accent-soft);color:var(--accent-ink)">You</span>
+                <p>The callback keeps landing on localhost in production.</p>
+              </div>
+              <div class="vd-turn">
+                <span class="vd-ava" style="background:var(--tool-claude);color:#1c1a14">C</span>
+                <p><code>nextUrl.origin</code> resolves to the container's own address behind the proxy.
+                   Reading <code>x-forwarded-host</code> instead fixes it.</p>
+              </div>
+              <div class="vd-files">
+                <div><span class="vd-plus">+12</span><span class="vd-minus">−3</span><span class="vd-mono">src/lib/auth.ts</span></div>
+                <div><span class="vd-plus">+6</span><span class="vd-minus">−1</span><span class="vd-mono">src/app/api/callback/route.ts</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="vd-chat">
+            <div class="vd-chathead" style="background:var(--bg-side)">
+              <div class="vd-tabs"><span class="vd-tab on">Chat</span><span class="vd-tab">Agent</span><span class="vd-tab">Terminal</span></div>
+              <span class="vd-badge n">42 turns</span>
+            </div>
+            <div class="vd-msgs">
+              <div class="vd-msg me">What should I check before shipping?</div>
+              <div class="vd-msg ai">The redirect URI registered on the OAuth app still points at the old host — update it, or the fix works locally and fails in production.</div>
+            </div>
+            <div class="vd-composer">
+              <div class="vd-input" style="display:flex;align-items:center">Ask about this session <span class="vd-send">↑</span></div>
+              <div class="vd-cbar"><span>/ commands</span><span class="sp"></span><span>Opus 5</span><span>high</span></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+    <aside>
+      <span class="eyebrow">Sessions</span>
+      <h2 class="display" style="font-size:30px">Every session, on the record.</h2>
+      <p class="prose" style="margin-top:12px">
+        A teammate's session is the full transcript plus the diffs each turn produced,
+        searchable. Yours are writable; theirs are read-only.
+      </p>
+      <p class="prose" style="margin-top:10px">
+        And you can ask about one — the chat reads the transcript and diffs on demand
+        instead of being handed the whole thing.
+      </p>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================== TERMINAL ============================== -->
+<div class="dark-band" id="terminal">
+  <section class="band wrap reveal">
+    <span class="eyebrow">Terminal</span>
+    <h2 class="display">Your agents, side by side.</h2>
+    <p class="prose" style="margin-top:14px">
+      Real shells on your own Mac, inside the app — a real pty, so <span style="font-family:var(--mono);font-size:14px">vim</span>,
+      <span style="font-family:var(--mono);font-size:14px">top</span>, password prompts and
+      <span style="font-family:var(--mono);font-size:14px">claude</span> behave. Up to four panes at once,
+      so several agents run in parallel. A shell belongs to the project and outlives the page:
+      navigate away, come back, and the build is still going.
+    </p>
+
+    <div class="mini-grid" style="grid-template-columns:1fr 1fr;margin-top:30px">
+      <div class="mini">
+        <h3>Both themes, all sixteen colours</h3>
+        <p>The ANSI palette is defined per theme, so a <span style="font-family:var(--mono)">git diff</span> is readable on cream too.</p>
+        <div class="vd frame-scroll" data-vd-theme="light">
+          <figure class="vd-frame">
+            <div class="vd-titlebar"><span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span><span class="vd-tl" style="background:#28c840"></span><span>Cream</span></div>
+            <div class="vd-shellbar">
+              <span class="vd-shell on">Shell 1</span><span class="vd-shell">Shell 2</span><span class="vd-shell">+</span>
+              <span class="vd-split"><i>⊞</i><i>1</i><i class="on">2</i><i>3</i><i>4</i></span>
+            </div>
+            <div class="vd-panes n2" style="min-height:150px">
+              <div class="vd-pane sel">
+                <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em></div>
+                <div><span class="t">›</span> <span class="o">rename the workspace</span></div>
+                <div><span class="g">✓</span> <span class="o">14 files</span></div>
+                <div><span class="t">›</span> <span class="o cursor">▊</span></div>
+              </div>
+              <div class="vd-pane">
+                <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em></div>
+                <div><span class="t">›</span> <span class="o">add the tablet screenshots</span></div>
+                <div class="c">· generating 7in, 10in</div>
+                <div><span class="o">▊</span></div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+      <div class="mini">
+        <h3>&nbsp;</h3>
+        <p>&nbsp;</p>
+        <div class="vd frame-scroll" data-vd-theme="dark">
+          <figure class="vd-frame">
+            <div class="vd-titlebar"><span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span><span class="vd-tl" style="background:#28c840"></span><span>Dark</span></div>
+            <div class="vd-shellbar">
+              <span class="vd-shell on">Shell 1</span><span class="vd-shell">Shell 2</span><span class="vd-shell">+</span>
+              <span class="vd-split"><i>⊞</i><i>1</i><i class="on">2</i><i>3</i><i>4</i></span>
+            </div>
+            <div class="vd-panes n2" style="min-height:150px">
+              <div class="vd-pane sel">
+                <div class="who"><b style="background:var(--tool-claude)">C</b><em>Claude Code</em></div>
+                <div><span class="t">›</span> <span class="o">rename the workspace</span></div>
+                <div><span class="g">✓</span> <span class="o">14 files</span></div>
+                <div><span class="t">›</span> <span class="o cursor">▊</span></div>
+              </div>
+              <div class="vd-pane">
+                <div class="who"><b style="background:var(--tool-codex)">O</b><em>Codex</em></div>
+                <div><span class="t">›</span> <span class="o">add the tablet screenshots</span></div>
+                <div class="c">· generating 7in, 10in</div>
+                <div><span class="o">▊</span></div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </div>
+
+    <p class="prose" style="margin-top:26px;font-size:14px;color:#8a8a9e">
+      The terminal is macOS and Verdict.app only — a browser tab has no shell to open.
+      It runs on your machine; nothing is hosted.
+    </p>
+  </section>
+</div>
+
+<!-- =============================== ISSUES =============================== -->
+<section class="band" id="issues">
+  <div class="wrap spread flip reveal">
+    <aside>
+      <span class="eyebrow">Issues</span>
+      <h2 class="display" style="font-size:30px">It files the issue for you.</h2>
+      <p class="prose" style="margin-top:12px">
+        Someone told their agent something was broken — mid-task, in passing.
+        Verdict found it in the session and put it on the board. Nobody filed it,
+        and dismissing a wrong catch is one click.
+      </p>
+      <p class="prose" style="margin-top:10px;font-size:13px">
+        Found on a rolling scan of synced sessions, using a connected AI key.
+        Two-way GitHub sync: import repo issues, claim and close from either side.
+      </p>
+    </aside>
+    <div class="vd frame-scroll" data-vd-theme="light">
+      <figure class="vd-frame">
+        <div class="vd-titlebar">
+          <span class="vd-tl" style="background:#ff5f57"></span><span class="vd-tl" style="background:#febc2e"></span>
+          <span class="vd-tl" style="background:#28c840"></span><span>Verdict — Issues</span>
+        </div>
+        <div class="vd-body">
+          <div class="vd-kanban">
+            <div class="vd-col">
+              <div class="h">Open <span>3</span></div>
+              <div class="vd-ticket" style="border-color:color-mix(in srgb, var(--accent) 35%, var(--line))">
+                <p>Speedometer overlaps route controls during navigation</p>
+                <div class="m"><span class="vd-found">✦ found in a session</span></div>
+              </div>
+              <div class="vd-ticket"><p>Diff view drops the last line of a hunk</p>
+                <div class="m"><span class="vd-badge r">bug</span><span class="vd-btn sub" style="margin-left:auto">Take it</span></div></div>
+              <div class="vd-ticket"><p>Add keyboard shortcut for merge</p>
+                <div class="m"><span class="vd-badge n">enhancement</span></div></div>
+            </div>
+            <div class="vd-col">
+              <div class="h">Claimed <span>1</span></div>
+              <div class="vd-ticket"><p>Workspace switcher forgets scroll position</p>
+                <div class="m"><span class="vd-pfp" style="width:20px;height:20px;font-size:9px">K</span>
+                  <span class="vd-btn sub" style="margin-left:auto">Start</span></div></div>
+            </div>
+            <div class="vd-col">
+              <div class="h">In progress <span>2</span></div>
+              <div class="vd-ticket"><p>Rework the auth redirect flow</p>
+                <div class="m"><span class="vd-pfp" style="width:20px;height:20px;font-size:9px">A</span>
+                  <span class="vd-badge g">live</span>
+                  <span class="vd-btn sub" style="margin-left:auto">Mark done</span></div></div>
+              <div class="vd-ticket"><p>Cache the session manifest</p>
+                <div class="m"><span class="vd-pfp" style="width:20px;height:20px;font-size:9px">M</span></div></div>
+            </div>
+            <div class="vd-col">
+              <div class="h">Done <span>4</span></div>
+              <div class="vd-ticket"><p>Per-user encrypted key storage</p>
+                <div class="m"><span class="vd-badge g">closed</span></div></div>
+              <div class="vd-ticket"><p>Cream light theme</p>
+                <div class="m"><span class="vd-badge g">closed</span></div></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ THE REST, COMPACTLY ============================ -->
+<div class="dark-band">
+  <section class="band wrap reveal">
+    <span class="eyebrow">And the rest</span>
+    <h2 class="display">The parts a team expects, kept small.</h2>
+    <div class="mini-grid">
+      <div class="mini">
+        <h3>Updates</h3>
+        <p>A changelog built from sessions and merged PRs, grouped by day.</p>
+        <div class="vd frame-scroll" data-vd-theme="dark">
+          <figure class="vd-frame"><div class="vd-body">
+            <div class="vd-tl2">
+              <p class="vd-day">Today</p>
+              <div class="vd-ev">
+                <div class="s">Fixed the OAuth redirect behind the proxy</div>
+                <div class="w">Ada · <span class="vd-mono">a572ae1</span></div>
+                <div class="vd-files">
+                  <div><span class="vd-plus">+12</span><span class="vd-minus">−3</span><span class="vd-mono">src/lib/auth.ts</span></div>
+                </div>
+              </div>
+              <p class="vd-day" style="margin-top:14px">Yesterday</p>
+              <div class="vd-ev">
+                <div class="s">Moved API keys to per-user encrypted storage</div>
+                <div class="w">Kai · <span class="vd-mono">5fe81c8</span></div>
+              </div>
+              <div class="vd-ev">
+                <div class="s">Made the sessions layout collapsible</div>
+                <div class="w">Ada · <span class="vd-mono">b03e9df</span></div>
+              </div>
+            </div>
+          </div></figure>
+        </div>
+      </div>
+      <div class="mini">
+        <h3>Roadmap</h3>
+        <p>Now, next, later — with votes. Enough structure to agree on order.</p>
+        <div class="vd frame-scroll" data-vd-theme="dark">
+          <figure class="vd-frame"><div class="vd-body">
+            <div class="vd-kanban" style="grid-template-columns:repeat(3,1fr)">
+              <div class="vd-col">
+                <div class="h">Now</div>
+                <div class="vd-ticket"><p style="font-weight:600">Collapsible session layout</p>
+                  <div class="m"><span class="vd-badge p">▲ 7</span></div></div>
+              </div>
+              <div class="vd-col">
+                <div class="h">Next</div>
+                <div class="vd-ticket"><p style="font-weight:600">Cursor and Copilot sessions</p>
+                  <div class="m"><span class="vd-badge p">▲ 9</span></div></div>
+              </div>
+              <div class="vd-col">
+                <div class="h">Later</div>
+                <div class="vd-ticket"><p style="font-weight:600">Session replay</p>
+                  <div class="m"><span class="vd-badge p">▲ 3</span></div></div>
+              </div>
+            </div>
+          </div></figure>
+        </div>
+      </div>
+      <div class="mini">
+        <h3>Projects</h3>
+        <p>Multi-repo. Link a local folder so its AI sessions sync.</p>
+        <div class="vd frame-scroll" data-vd-theme="dark">
+          <figure class="vd-frame"><div class="vd-body">
+            <div class="vd-grid2">
+              <div class="vd-card">
+                <b style="font-size:13.5px">Atlas</b>
+                <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
+                  <span class="vd-badge n">northwind/atlas</span>
+                  <span class="vd-badge n">northwind/atlas-api</span>
+                </div>
+                <div class="vd-mono" style="margin-top:8px">~/Projects/atlas</div>
+                <div style="margin-top:9px;font-size:11.5px;color:var(--ink-3)">31 sessions · 6 open issues</div>
+              </div>
+              <div class="vd-card">
+                <b style="font-size:13.5px">Marketing site</b>
+                <div style="margin-top:8px"><span class="vd-badge n">northwind/www</span></div>
+                <div style="margin-top:9px"><span class="vd-btn sub">Attach a repo</span></div>
+              </div>
+            </div>
+          </div></figure>
+        </div>
+      </div>
+      <div class="mini">
+        <h3>Team</h3>
+        <p>Per-workspace invites. Nobody arrives with sight of your other work.</p>
+        <div class="vd frame-scroll" data-vd-theme="dark">
+          <figure class="vd-frame"><div class="vd-body">
+            <div class="vd-rows">
+              <div class="r"><span class="vd-pfp">A</span>
+                <div class="min0" style="flex:1;min-width:0"><b>Ada Kowalski</b><em>ada@northwind.dev</em></div>
+                <span class="vd-badge p">owner</span></div>
+              <div class="r"><span class="vd-pfp">K</span>
+                <div class="min0" style="flex:1;min-width:0"><b>Kai Rehman</b><em>kai@northwind.dev</em></div>
+                <span class="vd-badge n">admin</span></div>
+              <div class="r"><span class="vd-pfp">M</span>
+                <div class="min0" style="flex:1;min-width:0"><b>mo@northwind.dev</b><em>Invitation sent 2 days ago</em></div>
+                <span class="vd-badge a">invited</span></div>
+            </div>
+          </div></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ========================== PRIVACY + YOUR KEY ========================== -->
+<section class="band">
+  <div class="wrap reveal">
+    <span class="eyebrow">The two questions everyone asks</span>
+    <div class="factual">
+      <div class="fact">
+        <h3>Where does my code go?</h3>
+        <p>
+          Transcripts and diffs sync to your workspace's database. The terminal and the
+          agents run entirely on your Mac. Project membership is checked on the server
+          for every query — not filtered in the browser — and that boundary is covered
+          by tests that fail if a filter is removed.
+        </p>
+      </div>
+      <div class="fact">
+        <h3>Do I need another AI subscription?</h3>
+        <p>
+          No. Each person adds their own Anthropic or OpenAI key. Verdict never holds
+          a shared one, and never bills for inference — there is no metered cost on top.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== PRICING =============================== -->
+<div class="dark-band" id="pricing">
+  <section class="band wrap reveal">
+    <span class="eyebrow">Pricing</span>
+    <h2 class="display">One price. The whole team.</h2>
+    <div class="price-card" style="background:var(--night-sub);border-color:#3b3b4d">
+      <div class="head" style="border-bottom-color:#2c2c3a">
+        <div class="price-num" style="color:#f1f1f7">$10 <small>/ month</small></div>
+        <div class="who" style="color:#adadc0">for your whole workspace — unlimited members</div>
+      </div>
+      <ul style="color:#adadc0">
+        <li>Unlimited teammates and workspaces; inviting someone costs nothing</li>
+        <li>Everything in the product — sessions, terminal, issues, updates</li>
+        <li>Your own AI key, so there is no metered cost on top</li>
+        <li>$100 a year if you'd rather pay once</li>
+      </ul>
+      <div class="act">
+        <a class="btn ink" href="https://verdict-app.up.railway.app/upgrade">Get Verdict Pro</a>
+      </div>
+    </div>
+    <p class="small-print" style="color:#8a8a9e">
+      The first 30 days are free, no card needed. After the trial, without a subscription,
+      the account moves to the free plan — one workspace, two members, enforced server-side.
+      Cancel any time.
+    </p>
+  </section>
+</div>
+
+<!-- =============================== FOOTER =============================== -->
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <a class="brand" href="#" style="color:#f1f1f7"><img src="assets/verdict-logo.svg" alt="" /> Verdict</a>
+      <nav>
+        <a href="https://verdict-app.up.railway.app/api/download/mac">Download for Mac</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://verdict-app.up.railway.app/upgrade">Get Verdict Pro</a>
+        <a href="https://github.com/TBA115/verdict-releases/releases">Releases</a>
+        <a href="mailto:verdict@hilmtec.com">verdict@hilmtec.com</a>
+      </nav>
+    </div>
+    <p class="fine">macOS only. Built by a small team that codes with AI all day; the screens above are the product.</p>
+  </div>
+</footer>
+
+<script>
+  // A short fade on scroll-in — the page's only motion besides the cursors.
+  const io = new IntersectionObserver((entries) => {
+    for (const entry of entries) if (entry.isIntersecting) {
+      entry.target.classList.add("in");
+      io.unobserve(entry.target);
+    }
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+</script>
+</body>
+</html>
