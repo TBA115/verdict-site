@@ -170,6 +170,21 @@ h2.display { font-size: clamp(30px, 4.4vw, 46px); margin-top: 10px; }
 .tier .btn { justify-content: center; }
 .small-print { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); max-width: 52ch; }
 
+/* direct purchase */
+.buy-email { margin-top: 28px; max-width: 560px; display: grid; gap: 6px; }
+.buy-email input {
+  border: 1px solid #3b3b4d; border-radius: 10px; background: var(--night-sub);
+  color: #f1f1f7; padding: 12px 14px; font: inherit; font-size: 15px;
+}
+.buy-email input:focus { outline: 2px solid var(--night-accent); outline-offset: 1px; }
+.buy-email span { font-size: 12px; color: #8a8a9e; }
+.buy-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.buy-row .btn { flex: 1; justify-content: center; padding: 10px 8px; font-size: 13.5px; }
+button.btn { border: 1px solid transparent; }
+button.btn.ghost { border-color: #3b3b4d; background: transparent; color: #adadc0; }
+button.btn.ghost:hover { border-color: #8a8a9e; color: #f1f1f7; }
+button.btn[disabled] { opacity: .6; }
+
 /* footer *//* footer */
 footer { background: var(--night); color: #adadc0; padding: 44px 0 52px; }
 footer .cols { display: flex; flex-wrap: wrap; gap: 26px; align-items: center; }
@@ -666,6 +681,11 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
   <section class="band wrap" data-reveal>
     <span class="eyebrow">Pricing</span>
     <h2 class="display">One deal — unlimited members. Three sizes.</h2>
+    <div class="buy-email">
+      <input type="email" id="buy-email" placeholder="you@company.com" aria-label="Email for your subscription" />
+      <span>Your subscription attaches to this email — sign in with it afterwards and everything is there.</span>
+    </div>
+    <p class="wl-note" data-buy-note></p>
     <div class="tier-grid">
       <div class="tier is-pro">
         <div class="tier-name">Pro <span class="tier-tag">most teams</span></div>
@@ -677,7 +697,10 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
           <li>Everything in the product</li>
           <li>Your own AI key, no metered cost on top</li>
         </ul>
-        <a class="btn ink" href="https://verdict-app.up.railway.app/upgrade">Get Verdict Pro</a>
+        <span class="buy-row">
+          <button class="btn ink" data-buy data-tier="pro" data-interval="monthly" type="button">$10 monthly</button>
+          <button class="btn ghost" data-buy data-tier="pro" data-interval="annual" type="button">$100 annual</button>
+        </span>
       </div>
       <div class="tier">
         <div class="tier-name">Max</div>
@@ -689,7 +712,10 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
           <li>Everything in Pro</li>
           <li>For agencies and multi-product teams</li>
         </ul>
-        <a class="btn ghost" href="https://verdict-app.up.railway.app/upgrade">Get Verdict Max</a>
+        <span class="buy-row">
+          <button class="btn ink" data-buy data-tier="max" data-interval="monthly" type="button">$25 monthly</button>
+          <button class="btn ghost" data-buy data-tier="max" data-interval="annual" type="button">$250 annual</button>
+        </span>
       </div>
       <div class="tier">
         <div class="tier-name">Enterprise</div>
@@ -703,6 +729,10 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
         <a class="btn ghost" href="mailto:verdict@hilmtec.com?subject=Verdict%20Enterprise">Write to us</a>
       </div>
     </div>
+    <p class="small-print" style="color:#8a8a9e">
+      Payment is handled by SkipCash. Already using Verdict? Upgrade from
+      <a href="https://verdict-app.up.railway.app/upgrade" style="color:#adadc0">inside the app</a> instead.
+    </p>
     <p class="small-print" style="color:#8a8a9e">
       Every new account starts with 30 days of Pro, free — no card needed. If you
       don't subscribe when it ends, you move to the free plan: one workspace, two
@@ -728,6 +758,42 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 </footer>
 
 <script>
+  // Direct purchase: email + tier + interval to the app's guest checkout,
+  // then straight to SkipCash. The price never leaves the server.
+  const buyNote = document.querySelector("[data-buy-note]");
+  document.querySelectorAll("[data-buy]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const email = (document.getElementById("buy-email").value || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        buyNote.textContent = "Enter the email your subscription should belong to, just above the plans.";
+        document.getElementById("buy-email").focus();
+        return;
+      }
+      buyNote.textContent = "Starting secure checkout…";
+      document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = true));
+      try {
+        const res = await fetch("https://verdict-app.up.railway.app/api/checkout/guest", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            email,
+            tier: button.dataset.tier,
+            interval: button.dataset.interval,
+            idempotencyKey: crypto.randomUUID(),
+          }),
+        });
+        const result = await res.json().catch(() => null);
+        if (!res.ok || !result || result.ok !== true) throw new Error((result && result.error) || "failed");
+        window.location.href = result.url;
+      } catch (err) {
+        document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = false));
+        buyNote.textContent =
+          (err && err.message !== "failed" ? err.message + " " : "Could not start checkout. ") +
+          "Try again, or email verdict@hilmtec.com.";
+      }
+    });
+  });
+
   // The waitlist box: one field, stored server-side, no tracking.
   const wlForm = document.getElementById("waitlist");
   const wlNote = document.querySelector("[data-wl-note]");
