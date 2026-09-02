@@ -358,7 +358,7 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
   <nav>
     <a href="#issues">Features</a>
     <a href="#pricing">Pricing</a>
-    <a class="btn ink sm" href="#waitlist">Join the waitlist</a>
+    <a class="btn ink sm" href="https://verdict-app.up.railway.app/api/download/mac">Download for Mac</a>
   </nav>
 </header>
 
@@ -372,13 +372,11 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
       the issue board current and warn each other about what's already being worked
       on. No more status updates on WhatsApp, no more two people building the same fix.
     </p>
-    <p class="mac">For macOS. Launching soon — leave your email and the download comes to you first.</p>
-    <form class="wl-form" id="waitlist">
-      <input type="email" name="email" required placeholder="you@company.com" aria-label="Email address" />
-      <button class="btn ink" type="submit">Join the waitlist</button>
+    <p class="mac">For macOS. The desktop app is where the terminal and session sync live.</p>
+    <div class="cta">
+      <a class="btn ink" href="https://verdict-app.up.railway.app/api/download/mac">Download for Mac</a>
       <a class="btn ghost" href="#pricing">See pricing</a>
-    </form>
-    <p class="wl-note" data-wl-note></p>
+    </div>
   </div>
 
   <div class="wrap hero-stage">
@@ -747,9 +745,9 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
     <div class="cols">
       <a class="brand" href="#" style="color:#f1f1f7"><img src="assets/verdict-logo.svg" alt="" /> Verdict</a>
       <nav>
-        <a href="#waitlist">Join the waitlist</a>
+        <a href="https://verdict-app.up.railway.app/api/download/mac">Download for Mac</a>
         <a href="#pricing">Pricing</a>
-        <a href="https://verdict-app.up.railway.app/upgrade">Get Verdict Pro</a>
+        <a href="https://github.com/TBA115/verdict-releases/releases">Releases</a>
         <a href="mailto:verdict@hilmtec.com">verdict@hilmtec.com</a>
       </nav>
     </div>
@@ -758,6 +756,42 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
 </footer>
 
 <script>
+  // Direct purchase: email + tier + interval to the app's guest checkout,
+  // then straight to SkipCash. The price never leaves the server.
+  const buyNote = document.querySelector("[data-buy-note]");
+  document.querySelectorAll("[data-buy]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const email = (document.getElementById("buy-email").value || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        buyNote.textContent = "Enter the email your subscription should belong to, just above the plans.";
+        document.getElementById("buy-email").focus();
+        return;
+      }
+      buyNote.textContent = "Starting secure checkout…";
+      document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = true));
+      try {
+        const res = await fetch("https://verdict-app.up.railway.app/api/checkout/guest", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            email,
+            tier: button.dataset.tier,
+            interval: button.dataset.interval,
+            idempotencyKey: crypto.randomUUID(),
+          }),
+        });
+        const result = await res.json().catch(() => null);
+        if (!res.ok || !result || result.ok !== true) throw new Error((result && result.error) || "failed");
+        window.location.href = result.url;
+      } catch (err) {
+        document.querySelectorAll("[data-buy]").forEach((b) => (b.disabled = false));
+        buyNote.textContent =
+          (err && err.message !== "failed" ? err.message + " " : "Could not start checkout. ") +
+          "Try again, or email verdict@hilmtec.com.";
+      }
+    });
+  });
+
   // Direct purchase: email + tier + interval to the app's guest checkout,
   // then straight to SkipCash. The price never leaves the server.
   const buyNote = document.querySelector("[data-buy-note]");
