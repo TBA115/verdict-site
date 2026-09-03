@@ -185,7 +185,21 @@ button.btn.ghost { border-color: #3b3b4d; background: transparent; color: #adadc
 button.btn.ghost:hover { border-color: #8a8a9e; color: #f1f1f7; }
 button.btn[disabled] { opacity: .6; }
 
-/* footer *//* footer */
+/* cookie consent banner */
+.consent {
+  position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 60; margin: 0 auto;
+  max-width: 620px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  background: var(--night-sub); color: #f1f1f7; border: 1px solid #3b3b4d;
+  border-radius: 14px; padding: 14px 18px; box-shadow: 0 18px 50px -20px rgba(0,0,0,.6);
+}
+.consent p { margin: 0; flex: 1; min-width: 220px; font-size: 13px; color: #adadc0; }
+.consent p a { color: var(--night-accent); }
+.consent-actions { display: flex; gap: 8px; margin-left: auto; }
+.consent .btn { padding: 8px 16px; font-size: 13.5px; }
+.consent[hidden] { display: none; }
+@media (max-width: 520px) { .consent-actions { width: 100%; } .consent .btn { flex: 1; justify-content: center; } }
+
+/* footer */
 footer { background: var(--night); color: #adadc0; padding: 44px 0 52px; }
 footer .cols { display: flex; flex-wrap: wrap; gap: 26px; align-items: center; }
 footer nav { display: flex; flex-wrap: wrap; gap: 20px; font-size: 13.5px; margin-left: auto; }
@@ -757,17 +771,25 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
   </div>
 </footer>
 
-<script>
-  // ---- Meta Pixel ----------------------------------------------------------
-  // Paste your Events Manager pixel id here to switch tracking on. Empty means
-  // the pixel stays dormant — no network calls, no cookies — so the page is
-  // safe to ship before the id exists.
-  const META_PIXEL_ID = "";
+<div class="consent" id="consent" role="dialog" aria-label="Cookie consent" hidden>
+  <p>We use one cookie to measure whether our ads work. Nothing else is tracked. See our <a href="/privacy">Privacy Policy</a>.</p>
+  <div class="consent-actions">
+    <button type="button" class="btn ghost" data-decline>Decline</button>
+    <button type="button" class="btn ink" data-accept>Accept</button>
+  </div>
+</div>
 
-  function fbTrack(event, params) {
-    if (window.fbq) window.fbq("track", event, params || {});
-  }
-  if (META_PIXEL_ID) {
+<script>
+  // ---- Meta Pixel, behind consent ------------------------------------------
+  // Paste your Events Manager pixel id here to switch tracking on. Empty means
+  // the pixel never loads regardless of consent. Even with an id, nothing fires
+  // until the visitor accepts — no fbevents.js request, no cookie — which is
+  // what lets the Privacy Policy say the site runs no tracker without consent.
+  const META_PIXEL_ID = "";
+  const CONSENT_KEY = "verdict-consent";
+
+  function loadPixel() {
+    if (!META_PIXEL_ID || window.fbq) return;
     !(function (f, b, e, v, n, t, s) {
       if (f.fbq) return;
       n = f.fbq = function () {
@@ -780,6 +802,35 @@ footer .fine { margin-top: 22px; font-size: 12px; color: #8a8a9e; }
     })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
     window.fbq("init", META_PIXEL_ID);
     window.fbq("track", "PageView");
+  }
+
+  function consent() {
+    try { return localStorage.getItem(CONSENT_KEY); } catch (e) { return null; }
+  }
+  function setConsent(v) {
+    try { localStorage.setItem(CONSENT_KEY, v); } catch (e) {}
+  }
+  // fbTrack only reaches the network once the pixel has actually loaded, which
+  // only happens after consent — so it is a safe no-op before then.
+  function fbTrack(event, params) {
+    if (window.fbq) window.fbq("track", event, params || {});
+  }
+
+  // Consent banner: shown only until a choice is stored.
+  const banner = document.getElementById("consent");
+  function decide(choice) {
+    setConsent(choice);
+    if (banner) banner.hidden = true;
+    if (choice === "granted") loadPixel();
+  }
+  if (consent() === "granted") {
+    loadPixel();
+  } else if (consent() === "denied") {
+    if (banner) banner.hidden = true;
+  } else if (banner) {
+    banner.hidden = false;
+    banner.querySelector("[data-accept]").addEventListener("click", () => decide("granted"));
+    banner.querySelector("[data-decline]").addEventListener("click", () => decide("denied"));
   }
 
   // Download for Mac is the top-of-funnel conversion now — one Lead per click.
